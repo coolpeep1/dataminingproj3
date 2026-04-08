@@ -2,7 +2,7 @@
 **CS4445 Data Mining and Knowledge Discovery in Databases – D Term 2026**  
 **Prof. Carolina Ruiz**
 
-**Students:** *\<replace this with your names in alphabetical order by last name\>*
+**Students:** : Shriya Kulkarni, Angela Long, Hrithika Ravishankar
 
 *Follow the Project Guidelines on the Canvas Site to write this Project report*
 
