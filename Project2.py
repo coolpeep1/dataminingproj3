@@ -5,7 +5,7 @@ from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from sklearn.linear_model import LinearRegression
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.model_selection import train_test_split, cross_val_predict
-from sklearn.metrics import mean_squared_error, mean_absolute_error
+from sklearn.metrics import accuracy_score, classification_report, mean_squared_error, mean_absolute_error, precision_score, recall_score
 
 # load the dataset
 df = pd.read_csv("healthcare-dataset-stroke-data.csv")
@@ -63,6 +63,23 @@ print("Accuracy:", accuracy_score(y_test_clf, y_pred_clf_entropy))
 print("Classification Report:\n", classification_report(y_test_clf, y_pred_clf_entropy))
 
 # max_depth
+print("\nDecision Tree with max_depth Experiments:")
+depth_values = [None, 3, 5, 10]
+
+for depth in depth_values:
+    tree_clf_depth = DecisionTreeClassifier(max_depth=depth, random_state=42)
+    scores = cross_val_predict(tree_clf_depth, X_clf, y_clf, cv=10)
+    print(f"Max Depth={depth}, Mean Accuracy={scores.mean():.4f}")
+    
+# min_samples_split
+print("\nDecision Tree with min_samples_split Experiments:")
+split_values = [2, 5, 10]
+
+for split in split_values:
+    tree_clf_split = DecisionTreeClassifier(min_samples_split=split, random_state=42)
+    scores = cross_val_predict(tree_clf_split, X_clf, y_clf, cv=10, scoring="accuracy")
+    print(f"Min Samples Split={split}, Mean Accuracy={scores['test_score'].mean():.4f}")
+
 
 # Regression Techniques
 
