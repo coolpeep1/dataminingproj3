@@ -3,6 +3,7 @@ import pandas as pd
 from sklearn.dummy import DummyRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, mean_absolute_error
+from sklearn.linear_model import LinearRegression
 
 # load the dataset
 df = pd.read_csv("healthcare-dataset-stroke-data.csv")
@@ -36,7 +37,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
 # predicts the average bmi value for all instances in the test set
 dummy_regr = DummyRegressor(strategy="mean")
 dummy_regr.fit(X_train, y_train)
-# makes predictions of the test data
+# makes predictions on the data
 y_pred = dummy_regr.predict(X_test)
 
 # calculates the RMSE and MAE for the Dummy Regressor
@@ -47,3 +48,23 @@ mae = mean_absolute_error(y_test, y_pred)
 print("\nDummy Regressor Results:")
 print("RMSE:", rmse)
 print("MAE:", mae)
+
+# Linear Regression:
+
+reg = LinearRegression()
+reg.fit(X_train, y_train)
+
+# makes predictions on the dataset
+y_pred = reg.predict(X_test)
+
+# calculates the RMSE and MAE 
+rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+mae = mean_absolute_error(y_test, y_pred)
+# calculates correlation coefficient
+correlation = np.corrcoef(y_test, y_pred)[0, 1]
+
+# print results
+print("\nLinear Regression Results:")
+print("RMSE:", rmse)
+print("MAE:", mae)
+print("Correlation Coefficient:", correlation)
