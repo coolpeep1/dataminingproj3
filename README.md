@@ -65,18 +65,18 @@ Run all experiments in **Python** using the following techniques:
 
 **Target attribute:** `stroke`
 
-#### Majority Class Classifier (Baseline)
+#### Majority Class Classifier (Baseline) - ANGELA/HRITHIKA
 - Use `DummyClassifier` from `sklearn.dummy`
 - Parameters: `strategy='most_frequent'`, all others default
 
-#### Decision Trees
+#### Decision Trees - HRITHIKA
 - Use `DecisionTreeClassifier` from `sklearn.tree`
 - Experiment with (one at a time, others at default):
   - `criterion`: `gini` (default) and `entropy`
   - `max_depth`: `None`, then determine a good value based on results
   - `min_samples_split`: default (`2`), then determine a good value based on results
-
-#### Random Forests
+ 
+#### Random Forests - SHRIYA
 - Use `RandomForestClassifier` from `sklearn.ensemble`
 - Experiment with (one at a time, others at default):
   - `n_estimators`: default (`100`), then determine a good value based on results
@@ -92,10 +92,10 @@ Run all experiments in **Python** using the following techniques:
 - Use `DummyRegressor` from `sklearn.dummy`
 - Parameters: `strategy='mean'`, all others default
 
-#### Linear Regression
+#### Linear Regression - ANGELA
 - Use `LinearRegression` from `sklearn.linear_model`
 
-#### Regression Trees
+#### Regression Trees - ANGELA
 - Use `DecisionTreeRegressor` from `sklearn.tree`
 
 #### Random Forests (Regression)

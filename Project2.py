@@ -1,12 +1,11 @@
 import numpy as np
 import pandas as pd
-from sklearn.dummy import DummyClassifier, DummyRegressor
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, classification_report, mean_squared_error, mean_absolute_error, precision_score, recall_score
+from sklearn.dummy import DummyRegressor, DummyClassifier
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from sklearn.linear_model import LinearRegression
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
-from sklearn.model_selection import cross_validate, cross_val_predict
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split, cross_val_predict
+from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 # load the dataset
 df = pd.read_csv("healthcare-dataset-stroke-data.csv")
