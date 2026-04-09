@@ -92,7 +92,7 @@ Run all experiments in **Python** using the following techniques:
 - Use `DummyRegressor` from `sklearn.dummy`
 - Parameters: `strategy='mean'`, all others default
 
-#### Linear Regression
+#### Linear Regression - ANGELA
 - Use `LinearRegression` from `sklearn.linear_model`
 
 #### Regression Trees
