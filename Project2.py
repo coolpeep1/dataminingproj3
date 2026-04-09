@@ -4,6 +4,8 @@ from sklearn.dummy import DummyRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 from sklearn.linear_model import LinearRegression
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.model_selection import cross_val_predict
 
 # load the dataset
 df = pd.read_csv("healthcare-dataset-stroke-data.csv")
@@ -65,6 +67,24 @@ correlation = np.corrcoef(y_test, y_pred)[0, 1]
 
 # print results
 print("\nLinear Regression Results:")
+print("RMSE:", rmse)
+print("MAE:", mae)
+print("Correlation Coefficient:", correlation)
+
+# Regression Trees:
+
+tree_reg = DecisionTreeRegressor(random_state=42)
+# makes predictions using 10-fold cross-validation
+y_pred = cross_val_predict(tree_reg, X, y, cv=10)
+
+# calculates the RMSE and MAE 
+rmse = np.sqrt(mean_squared_error(y, y_pred))
+mae = mean_absolute_error(y, y_pred)
+# calculates correlation coefficient
+correlation = np.corrcoef(y, y_pred)[0, 1]
+
+# print results
+print("\nDecision Tree Regressor Results (10-fold CV):")
 print("RMSE:", rmse)
 print("MAE:", mae)
 print("Correlation Coefficient:", correlation)
