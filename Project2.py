@@ -5,8 +5,10 @@ from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from sklearn.linear_model import LinearRegression
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.model_selection import train_test_split, cross_val_predict
-from sklearn.metrics import mean_squared_error, mean_absolute_error
-
+from sklearn.metrics import ( mean_squared_error, mean_absolute_error, recall_score, 
+                            accuracy_score, precision_score, recall_score, roc_auc_score,
+                            confusion_matrix)
+import time
 # load the dataset
 df = pd.read_csv("healthcare-dataset-stroke-data.csv")
 print(df.head())
@@ -88,3 +90,47 @@ print("\nDecision Tree Regressor Results (10-fold CV):")
 print("RMSE:", rmse)
 print("MAE:", mae)
 print("Correlation Coefficient:", correlation)
+
+# Classification Techniques
+
+# Random Forests
+
+X_cls = df.drop(columns=["stroke"])
+y_cls = df["stroke"]
+
+X_train_cls, X_test_cls, y_train_cls, y_test_cls = train_test_split( X_cls, y_cls, test_size=0.2, random_state=42, stratify=y_cls)
+
+def evaluate_classification_model(model_name, model):
+    start = time.time()
+    model.fit(X_train_cls, y_train_cls)
+    train_time = time.time() - start
+
+    y_pred = model.predict(X_test_cls)
+    y_prob = model.predict_proba(X_test_cls)[:, 1]
+
+    print(f"\n{model_name}")
+    print("Accuracy:", round(accuracy_score(y_test_cls, y_pred), 4))
+    print("Precision:", round(precision_score(y_test_cls, y_pred, zero_division=0), 4))
+    print("Recall:", round(recall_score(y_test_cls, y_pred, zero_division=0), 4))
+    print("Area under curve:", round(roc_auc_score(y_test_cls, y_prob), 4))
+    print("Confusion Matrix:")
+    print(confusion_matrix(y_test_cls, y_pred))
+    print("Time to construct in sec:", round(train_time, 4))
+
+# baseline,  need this for comparison
+dummy_clf = DummyClassifier(strategy="most_frequent")
+evaluate_classification_model("Most FrequentDummy Classifier ", dummy_clf)
+
+# default random forest 
+rf_default = RandomForestClassifier(random_state=42)
+evaluate_classification_model("Default Random Forest Classifier", rf_default)
+
+# experiment 1: varied n_estimators 
+for n in [100, 200, 300, 500]:
+    rf_n = RandomForestClassifier(n_estimators=n, random_state=42)
+    evaluate_classification_model(f"Random Forest Classifier n_estimators={n}", rf_n)
+
+# experiment 2: varied  max_depth 
+for depth in [None, 5, 10, 20]:
+    rf_depth = RandomForestClassifier(max_depth=depth, random_state=42)
+    evaluate_classification_model(f"Random Forest Classifier max_depth={depth}", rf_depth)
