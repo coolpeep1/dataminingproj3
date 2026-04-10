@@ -87,45 +87,47 @@ for split in split_values:
 
 # random forests
 
-X_cls = df.drop(columns=["stroke"])
-y_cls = df["stroke"]
+X_rf = df.drop(columns=["stroke"])
+y_rf = df["stroke"]
 
-X_train_cls, X_test_cls, y_train_cls, y_test_cls = train_test_split(X_cls, y_cls, test_size=0.2, random_state=42, stratify=y_cls)
-
-def evaluate_classification_model(model_name, model):
+cv = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
+def evaluate_rf_classification(model_name, model):
     start = time.time()
-    model.fit(X_train_cls, y_train_cls)
-    train_time = time.time() - start
+    y_pred = cross_val_predict(model, X_rf, y_rf, cv=cv, method="predict")
+    y_prob = cross_val_predict(model, X_rf, y_rf, cv=cv, method="predict_proba")[:, 1]
+    build_time = time.time() - start
 
-    y_pred = model.predict(X_test_cls)
-    y_prob = model.predict_proba(X_test_cls)[:, 1]
+    # fit once on full data to report model size
+    model.fit(X_rf, y_rf)
+    num_trees = len(model.estimators_)
+    avg_nodes = sum(tree.tree_.node_count for tree in model.estimators_) / num_trees
 
     print(f"\n{model_name}")
-    print("Accuracy:", round(accuracy_score(y_test_cls, y_pred), 4))
-    print("Precision:", round(precision_score(y_test_cls, y_pred, zero_division=0), 4))
-    print("Recall:", round(recall_score(y_test_cls, y_pred, zero_division=0), 4))
-    print("Area under curve:", round(roc_auc_score(y_test_cls, y_prob), 4))
+    print("Accuracy:", round(accuracy_score(y_rf, y_pred), 4))
+    print("Precision:", round(precision_score(y_rf, y_pred, zero_division=0), 4))
+    print("Recall:", round(recall_score(y_rf, y_pred, zero_division=0), 4))
+    print("ROC AUC:", round(roc_auc_score(y_rf, y_prob), 4))
     print("Confusion Matrix:")
-    print(confusion_matrix(y_test_cls, y_pred))
-    print("Time to construct in sec:", round(train_time, 4))
+    print(confusion_matrix(y_rf, y_pred))
+    print("Time to construct (sec):", round(build_time, 4))
+    print("Number of trees:", num_trees)
+    print("Average nodes/tree:", round(avg_nodes, 2))
 
-# baseline,  need this for comparison
+# baseline comparison
 dummy_clf = DummyClassifier(strategy="most_frequent")
-evaluate_classification_model("Most FrequentDummy Classifier ", dummy_clf)
+evaluate_rf_classification("most frequent Dummy Classifier ", dummy_clf)
 
-# default random forest 
+#   experiments
 rf_default = RandomForestClassifier(random_state=42)
-evaluate_classification_model("Default Random Forest Classifier", rf_default)
-
-# experiment 1: varied n_estimators 
-for n in [100, 200, 300, 500]:
-    rf_n = RandomForestClassifier(n_estimators=n, random_state=42)
-    evaluate_classification_model(f"Random Forest Classifier n_estimators={n}", rf_n)
-
-# experiment 2: varied  max_depth 
-for depth in [None, 5, 10, 20]:
-    rf_depth = RandomForestClassifier(max_depth=depth, random_state=42)
-    evaluate_classification_model(f"Random Forest Classifier max_depth={depth}", rf_depth)
+evaluate_rf_classification("Random Forest - Default", rf_default)
+rf_n200 = RandomForestClassifier(n_estimators=200, random_state=42)
+evaluate_rf_classification("Random Forest - n_estimators=200", rf_n200)
+rf_n300 = RandomForestClassifier(n_estimators=300, random_state=42)
+evaluate_rf_classification("Random Forest - n_estimators=300", rf_n300)
+rf_depth5 = RandomForestClassifier(max_depth=5, random_state=42)
+evaluate_rf_classification("Random Forest - max_depth=5", rf_depth5)
+rf_depth10 = RandomForestClassifier(max_depth=10, random_state=42)
+evaluate_rf_classification("Random Forest - max_depth=10", rf_depth10)
 
 # Regression Techniques
 
@@ -241,34 +243,45 @@ print("Correlation:", np.corrcoef(y, tree_y_pred)[0, 1])
 
 # random forest regressor:
 
-def evaluate_regression_model(model_name, model):
-    start = time.time()
-    #  10-fold cross validation
-    y_pred_cv = cross_val_predict(model, X, y, cv=10)
-    train_time = time.time() - start
+X_reg_rf = df_reg.drop(columns=["bmi"])
+y_reg_rf = df_reg["bmi"]
+cv_reg = KFold(n_splits=10, shuffle=True, random_state=42)
 
-    # calculates  RMSE and MAE 
-    rmse = np.sqrt(mean_squared_error(y, y_pred_cv))
-    mae = mean_absolute_error(y, y_pred_cv)
-    #  correlation coefficient
-    correlation = np.corrcoef(y, y_pred_cv)[0, 1]
+def evaluate_rf_regression(model_name, model):
+    start = time.time()
+    y_pred = cross_val_predict(model, X_reg_rf, y_reg_rf, cv=cv_reg, n_jobs=-1)
+    build_time = time.time() - start
+    rmse = np.sqrt(mean_squared_error(y_reg_rf, y_pred))
+    mae = mean_absolute_error(y_reg_rf, y_pred)
+    corr = np.corrcoef(y_reg_rf, y_pred)[0, 1]
+    model.fit(X_reg_rf, y_reg_rf)
+    num_trees = len(model.estimators_)
+    avg_nodes = sum(tree.tree_.node_count for tree in model.estimators_) / num_trees
 
     print(f"\n{model_name}")
     print("RMSE:", round(rmse, 4))
     print("MAE:", round(mae, 4))
-    print("Correlation Coefficient", round(correlation, 4))
-    print("Time to construct (sec):", round(train_time, 4))
+    print("Correlation Coefficient:", round(corr, 4))
+    print("Time to construct (sec):", round(build_time, 4))
+    print("Number of trees:", num_trees)
+    print("Average nodes per tree:", round(avg_nodes, 2))
 
-#basic random forest regressor
-rf_reg_default = RandomForestRegressor(random_state=42)
-evaluate_regression_model("Default Random Forest Regressor ", rf_reg_default)
+# baseline comparison
+dummy_regr = DummyRegressor(strategy="mean")
+evaluate_rf_regression("Dummy Regressor (Mean)", dummy_regr)
 
-#experiment 1: varied n_estimators 
-for n in [100, 200, 300, 500]:
-    rf_reg_n = RandomForestRegressor(n_estimators=n, random_state=42)
-    evaluate_regression_model(f"Random Forest Regressor, n_estimators={n}", rf_reg_n)
+# random rf experiments
+rf_default = RandomForestRegressor(random_state=42)
+evaluate_rf_regression("Random Forest Regressor - Default", rf_default)
 
-#experiment 2: varied max_depth 
-for depth in [None, 5, 10, 20]:
-    rf_reg_depth = RandomForestRegressor(max_depth=depth, random_state=42)
-    evaluate_regression_model(f"Random Forest Regressor, max_depth={depth}", rf_reg_depth)
+rf_n200 = RandomForestRegressor(n_estimators=200, random_state=42)
+evaluate_rf_regression("Random Forest Regressor - n_estimators=200", rf_n200)
+
+rf_n300 = RandomForestRegressor(n_estimators=300, random_state=42)
+evaluate_rf_regression("Random Forest Regressor - n_estimators=300", rf_n300)
+
+rf_depth5 = RandomForestRegressor(max_depth=5, random_state=42)
+evaluate_rf_regression("Random Forest Regressor - max_depth=5", rf_depth5)
+
+rf_depth10 = RandomForestRegressor(max_depth=10, random_state=42)
+evaluate_rf_regression("Random Forest Regressor - max_depth=10", rf_depth10)
