@@ -65,7 +65,7 @@ Run all experiments in **Python** using the following techniques:
 
 **Target attribute:** `stroke`
 
-#### Majority Class Classifier (Baseline) - ANGELA/HRITHIKA
+#### Majority Class Classifier (Baseline) - HRITHIKA
 - Use `DummyClassifier` from `sklearn.dummy`
 - Parameters: `strategy='most_frequent'`, all others default
 
@@ -88,7 +88,7 @@ Run all experiments in **Python** using the following techniques:
 
 **Target attribute:** `bmi` *(remove instances where BMI = N/A)*
 
-#### Majority Class Regressor (Baseline)
+#### Majority Class Regressor (Baseline) - ANGELA
 - Use `DummyRegressor` from `sklearn.dummy`
 - Parameters: `strategy='mean'`, all others default
 

@@ -4,9 +4,9 @@ from sklearn.dummy import DummyRegressor, DummyClassifier
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from sklearn.linear_model import LinearRegression
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
-from sklearn.model_selection import train_test_split, cross_val_predict
-from sklearn.metrics import ( mean_squared_error, mean_absolute_error, recall_score, 
-                            accuracy_score, precision_score, recall_score, roc_auc_score,
+from sklearn.model_selection import train_test_split, cross_val_predict, cross_val_score
+from sklearn.metrics import ( mean_squared_error, mean_absolute_error, recall_score, classification_report,
+                             accuracy_score, precision_score, recall_score, roc_auc_score,
                             confusion_matrix)
 import time
 # load the dataset
@@ -21,6 +21,108 @@ df = df.drop(columns=["id"])
 df["bmi"] = df["bmi"].fillna(df["bmi"].mean())
 # converted categorical variables to dummy variables
 df = pd.get_dummies(df, drop_first=True)
+
+# Classification Techniques
+
+# preprocessing the data for classification - removed id and converted categorical variables to numbers
+df_clf = pd.read_csv("healthcare-dataset-stroke-data.csv")
+df_clf = df_clf.drop(columns=["id"])
+df_clf = pd.get_dummies(df_clf, drop_first=True)
+
+# features and target
+X_clf = df_clf.drop(columns=["stroke"])
+y_clf = df_clf["stroke"]
+
+# split data
+X_train_clf, X_test_clf, y_train_clf, y_test_clf = train_test_split(X_clf, y_clf, random_state=42)
+
+# DummyClassifier with the most frequent strategy
+dummy_clf = DummyClassifier(strategy="most_frequent")
+dummy_clf.fit(X_train_clf, y_train_clf)
+y_pred_clf = dummy_clf.predict(X_test_clf)
+
+print("\nDummy Classifier (Most Frequent) Results:")
+print("Accuracy:", accuracy_score(y_test_clf, y_pred_clf))
+print("Precision:", precision_score(y_test_clf, y_pred_clf))
+print("Recall:", recall_score(y_test_clf, y_pred_clf))
+
+# decision Tree Classifier
+tree_clf = DecisionTreeClassifier(criterion="gini", random_state=42)
+tree_clf.fit(X_train_clf, y_train_clf)
+y_pred_tree_clf = tree_clf.predict(X_test_clf)
+
+print("\nDecision Tree (Gini)) Results:")
+print("Accuracy:", accuracy_score(y_test_clf, y_pred_tree_clf))
+print("Classification Report:\n", classification_report(y_test_clf, y_pred_tree_clf))
+
+# decision Tree Classifier with the entropy criterion
+tree_clf_entropy = DecisionTreeClassifier(criterion="entropy", random_state=42)
+tree_clf_entropy.fit(X_train_clf, y_train_clf)
+y_pred_clf_entropy = tree_clf_entropy.predict(X_test_clf)
+
+print("\nDecision Tree (Entropy) Results:")
+print("Accuracy:", accuracy_score(y_test_clf, y_pred_clf_entropy))
+print("Classification Report:\n", classification_report(y_test_clf, y_pred_clf_entropy))
+
+# max_depth
+print("\nDecision Tree with max_depth Experiments:")
+depth_values = [None, 3, 5, 10]
+
+for depth in depth_values:
+    tree_clf_depth = DecisionTreeClassifier(max_depth=depth, random_state=42)
+    scores = cross_val_score(tree_clf_depth, X_clf, y_clf, cv=10, scoring="accuracy")
+    print(f"Max Depth={depth}, Accuracy={scores.mean():.4f}")
+    
+# min_samples_split
+print("\nDecision Tree with min_samples_split Experiments:")
+split_values = [2, 5, 10]
+
+for split in split_values:
+    tree_clf_split = DecisionTreeClassifier(min_samples_split=split, random_state=42)
+    scores = cross_val_score(tree_clf_split, X_clf, y_clf, cv=10, scoring="accuracy")
+    print(f"Min Samples Split={split}, Accuracy={scores.mean():.4f}")
+
+# random forests
+
+X_cls = df.drop(columns=["stroke"])
+y_cls = df["stroke"]
+
+X_train_cls, X_test_cls, y_train_cls, y_test_cls = train_test_split( X_cls, y_cls, test_size=0.2, random_state=42, stratify=y_cls)
+
+def evaluate_classification_model(model_name, model):
+    start = time.time()
+    model.fit(X_train_cls, y_train_cls)
+    train_time = time.time() - start
+
+    y_pred = model.predict(X_test_cls)
+    y_prob = model.predict_proba(X_test_cls)[:, 1]
+
+    print(f"\n{model_name}")
+    print("Accuracy:", round(accuracy_score(y_test_cls, y_pred), 4))
+    print("Precision:", round(precision_score(y_test_cls, y_pred, zero_division=0), 4))
+    print("Recall:", round(recall_score(y_test_cls, y_pred, zero_division=0), 4))
+    print("Area under curve:", round(roc_auc_score(y_test_cls, y_prob), 4))
+    print("Confusion Matrix:")
+    print(confusion_matrix(y_test_cls, y_pred))
+    print("Time to construct in sec:", round(train_time, 4))
+
+# baseline,  need this for comparison
+dummy_clf = DummyClassifier(strategy="most_frequent")
+evaluate_classification_model("Most FrequentDummy Classifier ", dummy_clf)
+
+# default random forest 
+rf_default = RandomForestClassifier(random_state=42)
+evaluate_classification_model("Default Random Forest Classifier", rf_default)
+
+# experiment 1: varied n_estimators 
+for n in [100, 200, 300, 500]:
+    rf_n = RandomForestClassifier(n_estimators=n, random_state=42)
+    evaluate_classification_model(f"Random Forest Classifier n_estimators={n}", rf_n)
+
+# experiment 2: varied  max_depth 
+for depth in [None, 5, 10, 20]:
+    rf_depth = RandomForestClassifier(max_depth=depth, random_state=42)
+    evaluate_classification_model(f"Random Forest Classifier max_depth={depth}", rf_depth)
 
 # Regression Techniques
 
@@ -90,47 +192,3 @@ print("\nDecision Tree Regressor Results (10-fold CV):")
 print("RMSE:", rmse)
 print("MAE:", mae)
 print("Correlation Coefficient:", correlation)
-
-# Classification Techniques
-
-# Random Forests
-
-X_cls = df.drop(columns=["stroke"])
-y_cls = df["stroke"]
-
-X_train_cls, X_test_cls, y_train_cls, y_test_cls = train_test_split( X_cls, y_cls, test_size=0.2, random_state=42, stratify=y_cls)
-
-def evaluate_classification_model(model_name, model):
-    start = time.time()
-    model.fit(X_train_cls, y_train_cls)
-    train_time = time.time() - start
-
-    y_pred = model.predict(X_test_cls)
-    y_prob = model.predict_proba(X_test_cls)[:, 1]
-
-    print(f"\n{model_name}")
-    print("Accuracy:", round(accuracy_score(y_test_cls, y_pred), 4))
-    print("Precision:", round(precision_score(y_test_cls, y_pred, zero_division=0), 4))
-    print("Recall:", round(recall_score(y_test_cls, y_pred, zero_division=0), 4))
-    print("Area under curve:", round(roc_auc_score(y_test_cls, y_prob), 4))
-    print("Confusion Matrix:")
-    print(confusion_matrix(y_test_cls, y_pred))
-    print("Time to construct in sec:", round(train_time, 4))
-
-# baseline,  need this for comparison
-dummy_clf = DummyClassifier(strategy="most_frequent")
-evaluate_classification_model("Most FrequentDummy Classifier ", dummy_clf)
-
-# default random forest 
-rf_default = RandomForestClassifier(random_state=42)
-evaluate_classification_model("Default Random Forest Classifier", rf_default)
-
-# experiment 1: varied n_estimators 
-for n in [100, 200, 300, 500]:
-    rf_n = RandomForestClassifier(n_estimators=n, random_state=42)
-    evaluate_classification_model(f"Random Forest Classifier n_estimators={n}", rf_n)
-
-# experiment 2: varied  max_depth 
-for depth in [None, 5, 10, 20]:
-    rf_depth = RandomForestClassifier(max_depth=depth, random_state=42)
-    evaluate_classification_model(f"Random Forest Classifier max_depth={depth}", rf_depth)
