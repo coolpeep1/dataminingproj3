@@ -5,7 +5,7 @@ from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from sklearn.linear_model import LinearRegression
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.model_selection import train_test_split, cross_val_predict, cross_val_score
-from sklearn.metrics import ( mean_squared_error, mean_absolute_error, recall_score, classification_report,
+from sklearn.metrics import (mean_squared_error, mean_absolute_error, recall_score, classification_report,
                              accuracy_score, precision_score, recall_score, roc_auc_score,
                             confusion_matrix)
 import time
@@ -126,7 +126,7 @@ for depth in [None, 5, 10, 20]:
 
 # Regression Techniques
 
-# Majority Class regressor(baseline):
+# Dummy Regressor:
 
 # pre-processing the data for regression - reomved id, dropped rows with missing bmi values, and converted categorical variables to numbers
 df_reg = pd.read_csv("healthcare-dataset-stroke-data.csv")
@@ -144,55 +144,53 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
 dummy_regr = DummyRegressor(strategy="mean")
 dummy_regr.fit(X_train, y_train)
 # makes predictions on the data
-y_pred = dummy_regr.predict(X_test)
+dummy_y_pred = dummy_regr.predict(X_test)
 
 # calculates the RMSE and MAE for the Dummy Regressor
-rmse = np.sqrt(mean_squared_error(y_test, y_pred))
-mae = mean_absolute_error(y_test, y_pred)
+dummy_rmse = np.sqrt(mean_squared_error(y_test, dummy_y_pred))
+dummy_mae = mean_absolute_error(y_test, dummy_y_pred)
 
 # prints results
 print("\nDummy Regressor Results:")
-print("RMSE:", rmse)
-print("MAE:", mae)
+print("RMSE:", dummy_rmse)
+print("MAE:", dummy_mae)
 
 # Linear Regression:
 
-reg = LinearRegression()
-reg.fit(X_train, y_train)
+linear_reg = LinearRegression()
 
 # makes predictions on the dataset
-y_pred = reg.predict(X_test)
+linear_y_pred = cross_val_predict(linear_reg, X, y, cv=10)
 
 # calculates the RMSE and MAE 
-rmse = np.sqrt(mean_squared_error(y_test, y_pred))
-mae = mean_absolute_error(y_test, y_pred)
+linear_rmse = np.sqrt(mean_squared_error(y, linear_y_pred))
+linear_mae = mean_absolute_error(y, linear_y_pred)
 # calculates correlation coefficient
-correlation = np.corrcoef(y_test, y_pred)[0, 1]
+linear_correlation = np.corrcoef(y, linear_y_pred)[0, 1]
 
 # print results
 print("\nLinear Regression Results:")
-print("RMSE:", rmse)
-print("MAE:", mae)
-print("Correlation Coefficient:", correlation)
+print("RMSE:", linear_rmse)
+print("MAE:", linear_mae)
+print("Correlation Coefficient:", linear_correlation)
 
 # Regression Trees:
 
 tree_reg = DecisionTreeRegressor(random_state=42)
 # makes predictions using 10-fold cross-validation
-y_pred = cross_val_predict(tree_reg, X, y, cv=10)
+tree_y_pred = cross_val_predict(tree_reg, X, y, cv=10)
 
 # calculates the RMSE and MAE 
-rmse = np.sqrt(mean_squared_error(y, y_pred))
-mae = mean_absolute_error(y, y_pred)
+tree_rmse = np.sqrt(mean_squared_error(y, tree_y_pred))
+tree_mae = mean_absolute_error(y, tree_y_pred)
 # calculates correlation coefficient
-correlation = np.corrcoef(y, y_pred)[0, 1]
+tree_correlation = np.corrcoef(y, tree_y_pred)[0, 1]
 
 # print results
 print("\nDecision Tree Regressor Results (10-fold CV):")
-print("RMSE:", rmse)
-print("MAE:", mae)
-print("Correlation Coefficient:", correlation)
-
+print("RMSE:", tree_rmse)
+print("MAE:", tree_mae)
+print("Correlation Coefficient:", tree_correlation)
 # random forest regressor:
 
 def evaluate_regression_model(model_name, model):
