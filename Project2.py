@@ -49,7 +49,7 @@ tree_clf = DecisionTreeClassifier(criterion="gini", random_state=42)
 tree_clf.fit(X_train_clf, y_train_clf)
 y_pred_tree_clf = tree_clf.predict(X_test_clf)
 
-print("\nDecision Tree (Gini)) Results:")
+print("\nDecision Tree (Gini) Results:")
 print("Accuracy:", accuracy_score(y_test_clf, y_pred_tree_clf))
 print("Classification Report:\n", classification_report(y_test_clf, y_pred_tree_clf))
 
