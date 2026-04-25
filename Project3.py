@@ -6,8 +6,10 @@ from sklearn.decomposition import PCA
 from sklearn.metrics import silhouette_score
 from sklearn.metrics import pairwise_distances
 import seaborn as sns
-import matplotlib.pyplot as plt
 import numpy as np
+from sklearn.metrics import adjusted_rand_score
+from sklearn.metrics import normalized_mutual_info_score
+from sklearn.metrics import adjusted_mutual_info_score
 
 # Pre-processing Techniques
 
@@ -104,3 +106,17 @@ if len(set(dbscan_labels)) > 2:
     print("DBSCAN Silhouette:", silhouette_score(X_scaled, dbscan_labels))
 else:
     print("DBSCAN Silhouette: not valid")
+
+# Relative Indices
+    
+# K-Means compared to Hierarchical
+print("K-Means vs Hierarchical:")
+print("ARI:", adjusted_rand_score(kmeans_labels, hierarchical_labels))
+print("NMI:", normalized_mutual_info_score(kmeans_labels, hierarchical_labels))
+print("AMI:", adjusted_mutual_info_score(kmeans_labels, hierarchical_labels))
+
+# K-Means compared to DBSCAN
+print("\nK-Means vs DBSCAN:")
+print("ARI:", adjusted_rand_score(kmeans_labels, dbscan_labels))
+print("NMI:", normalized_mutual_info_score(kmeans_labels, dbscan_labels))
+print("AMI:", adjusted_mutual_info_score(kmeans_labels, dbscan_labels))
