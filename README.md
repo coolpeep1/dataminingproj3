@@ -116,7 +116,7 @@ For each of the 3 clustering methods used in this project (k-means, hierarchical
 
 ---
 
-### Clustering Evaluation - ANGELA / HRITHIKA
+### Clustering Evaluation - ANGELA
 
 A major part of this project is to find meaningful ways of evaluating and interpreting the resulting clusters. Devise a variety of approaches to do so, including but not limited to:
 
