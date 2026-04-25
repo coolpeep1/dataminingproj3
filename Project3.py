@@ -38,3 +38,17 @@ hierarchical_labels = hierarchical.fit_predict(X_scaled)
 # DBSCAN labels
 dbscan = DBSCAN(eps=2, min_samples=10)
 dbscan_labels = dbscan.fit_predict(X_scaled)
+
+# Clustering Evaluation
+
+# Visualization
+
+#make data 2D for visualization using PCA
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X_scaled)
+
+plt.scatter(X_pca[:, 0], X_pca[:, 1], c=kmeans_labels)
+plt.xlabel("PCA Component 1")
+plt.ylabel("PCA Component 2")
+plt.title("K-Means Clusters (PCA)")
+plt.show()
