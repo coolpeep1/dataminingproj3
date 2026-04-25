@@ -50,5 +50,19 @@ X_pca = pca.fit_transform(X_scaled)
 plt.scatter(X_pca[:, 0], X_pca[:, 1], c=kmeans_labels)
 plt.xlabel("PCA Component 1")
 plt.ylabel("PCA Component 2")
-plt.title("K-Means Clusters (PCA)")
+plt.title("K-Means Clustering (PCA)")
 plt.show()
+
+# Inspection
+
+# Puts the data into a DataFrame
+evaluation_df = pd.DataFrame(X)
+# cluster labels
+evaluation_df["cluster"] = kmeans_labels
+# stroke label
+evaluation_df["stroke"] = y
+
+# prints the average values in each cluster
+print(evaluation_df.groupby("cluster").mean())
+# prints the stroke distribution in each cluster
+print(pd.crosstab(evaluation_df["cluster"], evaluation_df["stroke"]))
