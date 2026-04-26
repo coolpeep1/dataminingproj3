@@ -29,18 +29,70 @@ X = pd.get_dummies(X, drop_first=True)
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
-# Temporary labels for clustering (waiting for actual labels from clustering techniques):
+# Clustering Techniques
 
-# K-Means labels
-kmeans = KMeans(n_clusters=3, random_state=42, n_init=10)
+# K-Means: find best k using elbow method for sum of squared errors (SSE)
+sse = []
+k_values = range(1, 11)
+
+for k in k_values:
+    kmeans = KMeans(n_clusters=k, random_state=4, n_init=10)
+    kmeans.fit(X_scaled)
+    sse.append(kmeans.inertia_)
+    
+plt.plot(k_values, sse, marker="o")
+plt.xlabel("Number of Clusters (k)")
+plt.ylabel("Sum of Squared Errors (SSE)")
+plt.title("Elbow Method for K-Means")
+plt.show()
+
+# choose best k based on elbow
+best_k = 3
+kmeans = KMeans(n_clusters=best_k, random_state=4, n_init=10)
 kmeans_labels = kmeans.fit_predict(X_scaled)
 
-# Hierarchical labels
-hierarchical = AgglomerativeClustering(n_clusters=3, linkage="ward")
-hierarchical_labels = hierarchical.fit_predict(X_scaled)
+# Hierarchical Clustering
+linkage_methods = ["ward", "complete", "average", "single"]
+hierarchical_labels = {}
 
-# DBSCAN labels
-dbscan = DBSCAN(eps=2, min_samples=10)
+for linkage in linkage_methods:
+    model = AgglomerativeClustering(n_clusters=best_k, linkage=linkage)
+    labels = model.fit_predict(X_scaled)
+    hierarchical_labels[linkage] = labels
+    
+    score = silhouette_score(X_scaled, labels)
+    print(f"{linkage} silhouette:", score)
+    
+# choose best linkage method based on silhouette score
+hierarchical_labels = hierarchical_labels["ward"]
+
+# DBSCAN Parammeter Search
+eps_values = [0.5, 1, 1.5, 2, 2.5, 3]
+min_samples_values = (5, 10, 15)
+
+best_dbscan_score = -1
+best_parameters = None
+
+for eps in eps_values:
+    for min_samples in min_samples_values:
+        dbscan = DBSCAN(eps=eps, min_samples=min_samples)
+        labels = dbscan.fit_predict(X_scaled)
+        
+        # skip if only one cluster
+        if len(set(labels)) <= 2:
+            continue
+        
+        score = silhouette_score(X_scaled, labels)
+        print(f"DBSCAN eps={eps}, min_samples={min_samples} silhouette={score}")
+        
+        if score > best_dbscan_score:
+            best_dbscan_score = score
+            best_parameters = (eps, min_samples)
+
+print("Best DBSCAN parameters:", best_parameters)
+
+#final DBSCAN with best parameters
+dbscan = DBSCAN(eps=best_parameters[0], min_samples=best_parameters[1])
 dbscan_labels = dbscan.fit_predict(X_scaled)
 
 # Clustering Evaluation
