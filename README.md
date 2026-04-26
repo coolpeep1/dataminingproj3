@@ -1,144 +1,153 @@
-# Project 2 Instructions
+# Project 3
 
-## Logistics
+## Due Date & Group Info
 
-- **Due Date:** Thursday, April 9th, 2026 at 10:00 PM *(see late submission policy at end of page)*
-- **Group Size:** Groups of 3 students
+Due date: This project is due on Tuesday, April 28th, 2026 at 10:00 pm. (See late submission policy for this project at the end of this page.)
 
-> ⚠️ Do not split the project so each student only does a portion. Each student is expected to work on the entire project individually, then meet as a group to clarify doubts, share findings, and combine solutions into one group report. Quizzes and exams will test you individually on what you learned.
+Group Project: This is a group project. Students must work in groups of 3 students.
 
-- Only **one submission per group**
-- Help or assistance from other groups, other people, or online resources is **NOT allowed**
+I expect that you work with the same group as in Project 2, but please let me know well in advance if you plan/need to change groups.
 
----
+Please do not split the project in a way that each student does only a portion of the work. Instead each student is expected to work on the entire project individually and then meet with the group to clarify doubts, share findings, and combine the project solutions into one group report. The quizzes and exams will test you individually on what you learned on this Project.
 
-## Preparation
+Only one submission per group (see a description of the required submission files below).
 
-- Study **Chapter 3, Sections 4.10.1, 4.10.2, 4.10.6**, and **Appendix D** (online) of the textbook in great detail.
-- Study all materials posted on the course Lecture Notes:
-  - **Prediction:** Classification, Regression, and Evaluation of Models
-  - Know the algorithms to construct **decision trees, regression trees, and model trees** very well — you must be able to construct trees from data **by hand** during quizzes and exams.
-- **Thoroughly read and follow the Project Guidelines.**
-
-> ⚠️ You must use the **Project 2 Template** provided. Do NOT change the structure, do NOT exceed page limits, and do NOT decrease the font size. (If you prefer not to use Word, copy the format into another editor while respecting the page structure and page limit.)
+Help or assistance from other groups, other people, unauthorized AI or online resources is NOT allowed.
 
 ---
 
-## Submission Instructions
+## Study Materials
 
-Submit the following **3 files** via Canvas (submission name: `Project2`):
+Study in great detail the following Chapters and Sections from the Textbook:
+- Sections 2.4 on "Measures of Similarity and Dissimilarity" (except for Sections 2.4.7 and 2.4.8).
+- Chapter 7 on "Cluster Analysis: Basic Concepts and Algorithms".
 
-1. **PDF** — Written report using the provided template and Project Guidelines.
-2. **.py or .ipynb** — All Python code written for each project part, organized neatly in order with comments.
-3. **PDF** — Answers to the following 5 questions (for in-class discussion highlights):
+Study all the materials posted on the course Lecture Notes:
+- Clustering
+- Anomaly Detection using clustering-based methods
 
-   **(a)** Your name
-
-   *Reflect on the course material covered in this project (think "big picture"):*
-
-   **(b)** What are the top 3 things you learned about **data mining techniques** from working on this project?
-
-   **(c)** What are the top 2 things you learned about the **data domain (stroke)** from uncovering patterns in this dataset?
-
-   **(d)** What are the top 3 things you want to **learn more about** regarding the topics covered by this project?
-
-   *Reflect on how you worked on this project:*
-
-   **(e)** If you could start working on this project again, what would you do differently?
+In particular, you should know the definitions of distance and similarity measures, and the algorithms for clustering data including k-means, hierarchical clustering, and density clustering very well, and be able to use these algorithms to cluster data "by hand" during quizzes and exams. Same comment applies to techniques to evaluate resulting clusterings, and to determine data outliers using clustering techniques.
 
 ---
 
-## Data Mining Techniques
+## Report Instructions
 
-Run all experiments in **Python** using the following techniques:
+THOROUGHLY READ AND FOLLOW THE PROJECT GUIDELINES. These guidelines contain detailed information about how to structure your project, how to prepare your written report and how to prepare your project highlights for in-class discussion.
 
-### Pre-processing
-
-- Consider pre-processing techniques discussed in class, the textbook, and used in Project 1 (feature selection, feature creation, dimensionality reduction, noise reduction, attribute transformations, etc.)
-- Determine which pre-processing techniques are **necessary** before mining predictive models. Start with the least pre-processing.
-- Determine which techniques are **useful (but not necessary)** by running experiments with and without them, and comparing their effect on performance and readability.
-- List all pre-processing performed in your report.
+*** You must use the Project 3 Template provided here for your written report. Do NOT change the structure of the report, do NOT exceed the page limits stated in the template and do NOT decrease the font size ***. Your whole report must fit within the page limit. *No* appendices allowed. Analyze your group results together and select as a group only the most significant results and analysis to include in the report. (If you prefer not to use Word, you can copy and paste this format in a different editor as long as you respect the stated page structure and page limit.)
 
 ---
 
-### Classification Techniques
+## Project Submission Instructions
 
-**Target attribute:** `stroke`
+Each group must submit the following 3 files using the Canvas system (submission name: Project3). Note: it is the responsibility of each teammate to make sure all the correct files are submitted by the deadline. Late penalty applies to the whole team is a project file is not submitted by the deadline.
 
-#### Majority Class Classifier (Baseline) - HRITHIKA
-- Use `DummyClassifier` from `sklearn.dummy`
-- Parameters: `strategy='most_frequent'`, all others default
+1. one pdf file with your project written report, using the template provided and following the instructions on the Project Guidelines.
+2. one .py or .ipynb file containing all the Python code that you wrote to perform each of the project parts below. Please organize your Python code neatly in the order of the project parts below with comments that help us understand your work.
+3. one pdf file with your answers to the following 5 questions summarizing your highlights for this project (which we'll use for this project's in-class discussion):
 
-#### Decision Trees - HRITHIKA
-- Use `DecisionTreeClassifier` from `sklearn.tree`
-- Experiment with (one at a time, others at default):
-  - `criterion`: `gini` (default) and `entropy`
-  - `max_depth`: `None`, then determine a good value based on results
-  - `min_samples_split`: default (`2`), then determine a good value based on results
- 
-#### Random Forests - SHRIYA
-- Use `RandomForestClassifier` from `sklearn.ensemble`
-- Experiment with (one at a time, others at default):
-  - `n_estimators`: default (`100`), then determine a good value based on results
-  - `max_depth`: `None`, then determine a good value based on results
+**(a)** Your names
 
----
+Reflect on the content of (i.e., the course material covered in) this project. Try to think "big picture" in answering these questions:
 
-### Regression Techniques
+**(b)** What are the top 3 things you learned about data mining techniques from working on this project?
 
-**Target attribute:** `bmi` *(remove instances where BMI = N/A)*
+**(c)** What are the top 2 things you learned about the data domain (i.e., stroke) from this project?
 
-#### Majority Class Regressor (Baseline) - ANGELA
-- Use `DummyRegressor` from `sklearn.dummy`
-- Parameters: `strategy='mean'`, all others default
+**(d)** What are the top 3 things you want to learn more about the topic covered by this project?
 
-#### Linear Regression - ANGELA
-- Use `LinearRegression` from `sklearn.linear_model`
+Reflect now on how you worked on this project:
 
-#### Regression Trees - ANGELA
-- Use `DecisionTreeRegressor` from `sklearn.tree`
-
-#### Random Forests (Regression) - SHRIYA 
-- Use `RandomForestRegressor` from `sklearn.ensemble`
-- Experiment with (one at a time, others at default):
-  - `n_estimators`: default (`100`), then determine a good value based on results
-  - `max_depth`: `None`, then determine a good value based on results
+**(e)** If you could start working on this project again, what would you do differently?
 
 ---
 
-## Dataset
+## Project Assignment
 
-Use the **[Stroke Prediction Dataset](https://www.kaggle.com/)** available on Kaggle.
+### Dataset
 
-| Task | Target Attribute | Notes |
-|------|-----------------|-------|
-| Classification | `stroke` | — |
-| Regression | `bmi` | Remove instances where BMI = N/A |
+Use the Stroke Prediction Dataset available at Kaggle.
+
+### Data Mining Technique(s)
+
+Run all project experiments in Python, using the following techniques:
 
 ---
 
-## Performance Metrics
+### Pre-processing Techniques
 
-### Classification
-- Classification accuracy
-- Precision
-- Recall
-- ROC Area
-- Confusion matrices
+- Consider the pre-processing techniques (feature selection, feature creation, dimensionality reduction, noise reduction, attribute transformations, ...) discussed in class, the textbook and used in previous projects.
+- Determine which pre-processing techniques are necessary to pre-process the given dataset before you can mine predictive (either classification or regression) models from this data. The least pre-processing at first, the better. List the necessary pre-processing you performed in your report.
+- Determine which pre-processing techniques would be useful (though not necessary) for this dataset in order to construct better clusterings. Do this by running experiments with and without applying these pre-processing techniques and comparing how they affect the clustering results.
+- Remember that it is a good idea in general to scale continuous attributes so that they are all in the same range so that an attribute with a large range doesn't have a disproportionate influence on the distance/similarity measurement.
 
-### Regression
-- Correlation coefficient
-- Any appropriate subset of:
-  - Mean Squared Error (MSE)
-  - Root Mean Squared Error (RMSE)
-  - Mean Absolute Error (MAE)
-  - Relative Squared Error (RSE)
-  - Root Relative Squared Error (RRSE)
-  - Relative Absolute Error (RAE)
+---
 
-### Additional Qualitative Criteria (for all models)
-- **Size** of the tree
-- **Readability** of the tree *(qualitative)*
-- **Time** to construct the tree
+### Clustering Techniques - HRITHIKA
 
-> Compare all accuracy/error metrics against the appropriate **baseline (Majority Class) classifier or regressor** over the same subset of data instances.
+Use the scikit learn clustering library: https://scikit-learn.org/stable/modules/clustering.html. Note that this page contains very useful illustrations and overviews of the clustering methods, worth reading!
+
+**K-means clustering:**
+https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html#sklearn.cluster.KMeans
+
+**Hierarchical clustering:** Experiment with "ward", "complete", "average", and "single" linkage:
+https://scikit-learn.org/stable/modules/generated/sklearn.cluster.AgglomerativeClustering.html#sklearn.cluster.AgglomerativeClustering
+
+**DBSCAN clustering:** Run experiments to find good parameter values.
+https://scikit-learn.org/stable/modules/generated/sklearn.cluster.DBSCAN.html#sklearn.cluster.DBSCAN
+
+**General Comments about Clustering:**
+- Focus on experimenting with varying the parameters of the clustering algorithms, and providing in-depth evaluation and interpretation of the results.
+- For k-means and for density-based-clustering, work on determining good parameter values using the methods described in class: For k-means, plot SSE values of clusterings with k = 1, 2, 3, 4, 5, ... to pick a good value for k. For density-based-clustering, use a similar approach to find good values for the epsilon and min-points parameters.
+- Once that you determine the best k value for k-means, compare the k-clustering obtained by k-means with the k-clusterings that can be derived from the hierarchical clustering dendrograms.
+
+---
+
+### Anomaly Detection using Cluster-based methods - SHRIYA
+
+For each of the 3 clustering methods used in this project (k-means, hierarchical, and DBSCAN):
+- Select a clustering obtained in one of your experiments.
+- Define a sound anomaly score, f(x), based on the cluster method.
+- Apply the anomaly score, f(x), to each data instance x in the dataset.
+- Determine whether the selected clustering identified the presence of outliers, either based on the resulting clusters themselves or the anomaly score, f(x).
+- If outliers are identified, take a close look at them and analyze what characteristics from the dataset domain (i.e., stroke) make them outliers.
+- Explain your answers, ideally illustrating with plots and/or visualizations.
+- Elaborate on whether the same outliers, if any, were identified by two or all three of the clustering methods.
+
+---
+
+### Clustering Evaluation - ANGELA
+
+A major part of this project is to find meaningful ways of evaluating and interpreting the resulting clusters. Devise a variety of approaches to do so, including but not limited to:
+
+- visualization (e.g., MDS, t-SNE, UMAP and/or others) of the resulting clusters (Python provides a good number of visualization functions);
+- inspection of the actual clusters' members to find similarities among data instances in a cluster and dissimilarities with data instances in different clusters; and
+- evaluation using the clustering-specific performance metrics/functions described in the textbook and/or https://scikit-learn.org/stable/modules/clustering.html#clustering-performance-evaluation (this page contains very useful performance evaluation information, worth reading). Include the following metrics:
+
+**Internal Indices:** These indices evaluate a clustering in terms of itself without external information.
+- Sum of Squared Errors (SSE).
+- Heatmap of the correlation between the distance (or proximity) matrix and the incidence matrix (as described in the textbook and slides).
+- Silhouette Coefficient: https://scikit-learn.org/stable/modules/generated/sklearn.metrics.silhouette_score.html#sklearn.metrics.silhouette_score
+
+**Relative Indices:** These indices are used to compare two different clusterings of a dataset. These two clustering can be the result of using the same clustering method with different parameters (e.g., comparing two k-means clusterings obtained using a different random seed; or comparing a 4-cluster clustering obtained from a single-link dendrogram against a 4-cluster clustering obtained from a complete-link dendrogram); or using two different clustering methods (e.g., comparing a k-means clustering against a 4-cluster clustering obtained from a Ward-link dendrogram).
+
+You can choose what pairs of clusterings to compare. Justify your choices in your written report.
+
+- Sum of Squared Errors (SSE).
+- Adjusted Rand score: https://scikit-learn.org/stable/modules/generated/sklearn.metrics.adjusted_rand_score.html#sklearn.metrics.adjusted_rand_score
+- Normalized mutual information score: https://scikit-learn.org/stable/modules/generated/sklearn.metrics.normalized_mutual_info_score.html#sklearn.metrics.normalized_mutual_info_score
+- Adjusted mutual information score: https://scikit-learn.org/stable/modules/generated/sklearn.metrics.adjusted_mutual_info_score.html#sklearn.metrics.adjusted_mutual_info_score
+
+**External Indices:** These indices are used to compare a clustering with respect to a target attribute given in the dataset (e.g., stroke or discretized BMI).
+
+You can choose what clusterings and what data attributes to use as labels in this comparison. Justify your choices in your written report. Make sure not to include the attribute that you are using as label among the input attributes used for clustering.
+
+- Homogeneity, completeness and V-measure:
+  - Homogeneity: https://scikit-learn.org/stable/modules/generated/sklearn.metrics.homogeneity_score.html#sklearn.metrics.homogeneity_score
+  - Completeness: https://scikit-learn.org/stable/modules/generated/sklearn.metrics.completeness_score.html#sklearn.metrics.completeness_score
+  - V-measure: https://scikit-learn.org/stable/modules/generated/sklearn.metrics.v_measure_score.html#sklearn.metrics.v_measure_score
+- Contingency Matrix: https://scikit-learn.org/stable/modules/generated/sklearn.metrics.cluster.contingency_matrix.html#sklearn.metrics.cluster.contingency_matrix
+
+Note: Some of the indices above listed under "Relative Indices" can also be used as "External Indices" and some of the indices listed under "External Indices" can also be used as "Relative Indices". This is because a (partitional) clustering of the data can be interpreted as a labeling of the data; and a labeling (classification) of the data can be interpreted as a (partitional) clustering of the data.
+
+The deeper your analysis, the better your project grade. You may consider implementing in Python evaluation/interpretation functionality that you need but doesn't currently exist in Python's libraries.
