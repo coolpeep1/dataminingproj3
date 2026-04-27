@@ -51,6 +51,13 @@ best_k = 3
 kmeans = KMeans(n_clusters=best_k, random_state=4, n_init=10)
 kmeans_labels = kmeans.fit_predict(X_scaled)
 
+# calculate percentage of instances per cluster
+cluster_percentages = pd.Series(kmeans_labels).value_counts(normalize=True) * 100
+print("Cluster Percentages:")
+
+for cluster in sorted(cluster_percentages.index):
+    print(f"Cluster {cluster}: {cluster_percentages[cluster]:.1f}%")
+
 # Hierarchical Clustering
 linkage_methods = ["ward", "complete", "average", "single"]
 hierarchical_labels = {}
