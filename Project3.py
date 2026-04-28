@@ -7,6 +7,7 @@ from sklearn.metrics import silhouette_score, pairwise_distances, adjusted_rand_
 import seaborn as sns
 import numpy as np
 from sklearn.metrics.cluster import contingency_matrix
+import time
 
 # Pre-processing Techniques
 
@@ -75,10 +76,42 @@ print("Number of flagged outliers:", anomaly_df["is_outlier"].sum())
 print(f"\nTop {top_n} K-means outliers:")
 print(top_outliers[["cluster", "anomaly_score", "stroke"]])
 
+# K-means anomaly detection
+kmeans_distances = np.linalg.norm(
+    X_scaled - kmeans.cluster_centers_[kmeans_labels], axis=1)
+
+distance_frame = pd.DataFrame(
+    {"cluster": kmeans_labels, "distance": kmeans_distances})
+cluster_rms = distance_frame.groupby("cluster")["distance"].transform( lambda values: np.sqrt(np.mean(np.square(values))))
+kmeans_anomaly_score = kmeans_distances / (cluster_rms + 1e-12)
+
+anomaly_df = df.copy()
+anomaly_df["cluster"] = kmeans_labels
+anomaly_df["anomaly_score"] = kmeans_anomaly_score
+top_n = 10
+top_outliers = anomaly_df.sort_values("anomaly_score", ascending=False).head(top_n)
+threshold = np.quantile(kmeans_anomaly_score, 0.99)
+anomaly_df["is_outlier"] = anomaly_df["anomaly_score"] >= threshold
+
+print("\nK-means anomaly score summary:")
+print(anomaly_df["anomaly_score"].describe())
+print(f"K-means outlier threshold (99th percentile): {threshold:.4f}")
+print("Number of flagged outliers:", anomaly_df["is_outlier"].sum())
+print(f"\nTop {top_n} K-means outliers:")
+print(top_outliers[["cluster", "anomaly_score", "stroke"]])
+
+# calculate percentage of instances per cluster
+cluster_percentages = pd.Series(kmeans_labels).value_counts(normalize=True) * 100
+print("Cluster Percentages:")
+
+for cluster in sorted(cluster_percentages.index):
+    print(f"Cluster {cluster}: {cluster_percentages[cluster]:.1f}%")
+
 # Hierarchical Clustering
 linkage_methods = ["ward", "complete", "average", "single"]
 hierarchical_labels = {}
 
+start_hier_total = time.time()
 for linkage in linkage_methods:
     model = AgglomerativeClustering(n_clusters=best_k, linkage=linkage)
     labels = model.fit_predict(X_scaled)
@@ -86,6 +119,9 @@ for linkage in linkage_methods:
     
     score = silhouette_score(X_scaled, labels)
     print(f"{linkage} silhouette:", score)
+    
+end_hier_total = time.time()
+print("Total time for hierarchical clustering:", end_hier_total - start_hier_total, "seconds")
     
 # choose best linkage method based on silhouette score
 hierarchical_labels = hierarchical_labels["ward"]
@@ -120,6 +156,43 @@ top_hier_outliers["hier_cluster"] = hierarchical_labels
 top_hier_outliers["hier_anomaly_score"] = hierarchical_anomaly_score
 print(top_hier_outliers.nlargest(top_n, "hier_anomaly_score")[["hier_cluster", "hier_anomaly_score", "stroke"]])
 
+# Hierarchical anomaly detection
+# Compute cluster centers for hierarchical clustering
+hierarchical_centers = np.vstack([X_scaled[hierarchical_labels==c].mean(axis=0) for c in sorted(np.unique(hierarchical_labels))])
+hierarchical_distances = np.linalg.norm(
+    X_scaled - hierarchical_centers[hierarchical_labels], axis=1)
+
+hier_distance_frame = pd.DataFrame(
+    {"cluster": hierarchical_labels, "distance": hierarchical_distances})
+hier_cluster_rms = hier_distance_frame.groupby("cluster")["distance"].transform(
+    lambda values: np.sqrt(np.mean(np.square(values))))
+hierarchical_anomaly_score = hierarchical_distances / (hier_cluster_rms + 1e-12)
+
+anomalies_hier = pd.DataFrame({
+    "cluster": hierarchical_labels,
+    "anomaly_score": hierarchical_anomaly_score
+})
+
+hier_threshold = np.quantile(hierarchical_anomaly_score, 0.99)
+hier_is_outlier = hierarchical_anomaly_score >= hier_threshold
+
+print("\nHierarchical anomaly score summary:")
+print(pd.Series(hierarchical_anomaly_score).describe())
+print(f"Hierarchical outlier threshold (99th percentile): {hier_threshold:.4f}")
+print("Number of flagged outliers:", hier_is_outlier.sum())
+print(f"\nTop {top_n} Hierarchical outliers:")
+top_hier_outliers = anomaly_df.copy()
+top_hier_outliers["hier_cluster"] = hierarchical_labels
+top_hier_outliers["hier_anomaly_score"] = hierarchical_anomaly_score
+print(top_hier_outliers.nlargest(top_n, "hier_anomaly_score")[["hier_cluster", "hier_anomaly_score", "stroke"]])
+
+print("\nHierarchical Cluster Percentages:")
+hier_percent = pd.Series(hierarchical_labels).value_counts(normalize=True).sort_index() * 100
+
+for cluster, pct in hier_percent.items():
+    print(f"Cluster {cluster}: {pct:.2f}%")
+    
+
 # DBSCAN Parammeter Search
 eps_values = [0.5, 1, 1.5, 2, 2.5, 3]
 min_samples_values = (5, 10, 15)
@@ -127,6 +200,7 @@ min_samples_values = (5, 10, 15)
 best_dbscan_score = -1
 best_parameters = None
 
+start_dbscan_total = time.time()
 for eps in eps_values:
     for min_samples in min_samples_values:
         dbscan = DBSCAN(eps=eps, min_samples=min_samples)
@@ -142,12 +216,23 @@ for eps in eps_values:
         if score > best_dbscan_score:
             best_dbscan_score = score
             best_parameters = (eps, min_samples)
+end_dbscan_total = time.time()
+print("Total DBSCAN grid search time:", end_dbscan_total - start_dbscan_total)
 
 print("Best DBSCAN parameters:", best_parameters)
 
 #final DBSCAN with best parameters
 dbscan = DBSCAN(eps=best_parameters[0], min_samples=best_parameters[1])
 dbscan_labels = dbscan.fit_predict(X_scaled)
+
+print("\nDBSCAN Cluster Percentages:")
+dbscan_percent = pd.Series(dbscan_labels).value_counts(normalize=True).sort_index() * 100
+
+for cluster, pct in dbscan_percent.items():
+    if cluster == -1:
+        print(f"Noise (-1): {pct:.2f}%")
+    else:
+        print(f"Cluster {cluster}: {pct:.2f}%")
 
 # DBSCAN anomaly detection 
 # # for core points compute distance to cluster center 
@@ -329,7 +414,9 @@ plt.show()
 print("K-Means Silhouette:", silhouette_score(X_scaled, kmeans_labels))
 print("Hierarchical Silhouette:", silhouette_score(X_scaled, hierarchical_labels))
 
-if len(set(dbscan_labels)) > 2:
+num_dbscan_clusters = len(set(dbscan_labels)) - (1 if -1 in dbscan_labels else 0)
+
+if num_dbscan_clusters >= 2:
     print("DBSCAN Silhouette:", silhouette_score(X_scaled, dbscan_labels))
 else:
     print("DBSCAN Silhouette: not valid")
