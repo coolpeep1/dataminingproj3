@@ -7,6 +7,7 @@ from sklearn.metrics import silhouette_score, pairwise_distances, adjusted_rand_
 import seaborn as sns
 import numpy as np
 from sklearn.metrics.cluster import contingency_matrix
+import time
 
 # Pre-processing Techniques
 
@@ -62,6 +63,7 @@ for cluster in sorted(cluster_percentages.index):
 linkage_methods = ["ward", "complete", "average", "single"]
 hierarchical_labels = {}
 
+start_hier_total = time.time()
 for linkage in linkage_methods:
     model = AgglomerativeClustering(n_clusters=best_k, linkage=linkage)
     labels = model.fit_predict(X_scaled)
@@ -70,8 +72,18 @@ for linkage in linkage_methods:
     score = silhouette_score(X_scaled, labels)
     print(f"{linkage} silhouette:", score)
     
+end_hier_total = time.time()
+print("Total time for hierarchical clustering:", end_hier_total - start_hier_total, "seconds")
+    
 # choose best linkage method based on silhouette score
 hierarchical_labels = hierarchical_labels["ward"]
+
+print("\nHierarchical Cluster Percentages:")
+hier_percent = pd.Series(hierarchical_labels).value_counts(normalize=True).sort_index() * 100
+
+for cluster, pct in hier_percent.items():
+    print(f"Cluster {cluster}: {pct:.2f}%")
+    
 
 # DBSCAN Parammeter Search
 eps_values = [0.5, 1, 1.5, 2, 2.5, 3]
@@ -80,6 +92,7 @@ min_samples_values = (5, 10, 15)
 best_dbscan_score = -1
 best_parameters = None
 
+start_dbscan_total = time.time()
 for eps in eps_values:
     for min_samples in min_samples_values:
         dbscan = DBSCAN(eps=eps, min_samples=min_samples)
@@ -95,12 +108,23 @@ for eps in eps_values:
         if score > best_dbscan_score:
             best_dbscan_score = score
             best_parameters = (eps, min_samples)
+end_dbscan_total = time.time()
+print("Total DBSCAN grid search time:", end_dbscan_total - start_dbscan_total)
 
 print("Best DBSCAN parameters:", best_parameters)
 
 #final DBSCAN with best parameters
 dbscan = DBSCAN(eps=best_parameters[0], min_samples=best_parameters[1])
 dbscan_labels = dbscan.fit_predict(X_scaled)
+
+print("\nDBSCAN Cluster Percentages:")
+dbscan_percent = pd.Series(dbscan_labels).value_counts(normalize=True).sort_index() * 100
+
+for cluster, pct in dbscan_percent.items():
+    if cluster == -1:
+        print(f"Noise (-1): {pct:.2f}%")
+    else:
+        print(f"Cluster {cluster}: {pct:.2f}%")
 
 # Clustering Evaluation
 
@@ -151,7 +175,7 @@ plt.show()
 # Incidence heatmap
 plt.figure(figsize=(6,5))
 sns.heatmap(incidence_matrix, cmap="coolwarm")
-plt.title("Incidence Matrix")
+plt.title("Incidence Matrix (Same Cluster = 1)")
 plt.show()
 
 # Silhouette Scores
