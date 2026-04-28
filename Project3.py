@@ -144,7 +144,7 @@ plt.show()
 # Incidence heatmap
 plt.figure(figsize=(6,5))
 sns.heatmap(incidence_matrix, cmap="coolwarm")
-plt.title("Incidence Matrix (Same Cluster = 1)")
+plt.title("Incidence Matrix")
 plt.show()
 
 # Silhouette Scores
