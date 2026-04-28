@@ -116,8 +116,9 @@ print(f"Hierarchical outlier threshold (99th percentile): {hier_threshold:.4f}")
 print("Number of flagged outliers:", hier_is_outlier.sum())
 print(f"\nTop {top_n} Hierarchical outliers:")
 top_hier_outliers = anomaly_df.copy()
+top_hier_outliers["hier_cluster"] = hierarchical_labels
 top_hier_outliers["hier_anomaly_score"] = hierarchical_anomaly_score
-print(top_hier_outliers.nlargest(top_n, "hier_anomaly_score")[["cluster", "hier_anomaly_score", "stroke"]])
+print(top_hier_outliers.nlargest(top_n, "hier_anomaly_score")[["hier_cluster", "hier_anomaly_score", "stroke"]])
 
 # DBSCAN Parammeter Search
 eps_values = [0.5, 1, 1.5, 2, 2.5, 3]
@@ -150,8 +151,10 @@ dbscan_labels = dbscan.fit_predict(X_scaled)
 
 # DBSCAN anomaly detection 
 # # for core points compute distance to cluster center 
-dbscan_centers = np.vstack([X_scaled[dbscan_labels==c].mean(axis=0) 
-for c in sorted(np.unique(dbscan_labels)) if c != -1])
+dbscan_centers = {
+    c: X_scaled[dbscan_labels == c].mean(axis=0)
+    for c in sorted(np.unique(dbscan_labels)) if c != -1
+}
 dbscan_anomaly_score = np.zeros(len(X_scaled))
 
 for c in sorted(np.unique(dbscan_labels)):
@@ -207,7 +210,7 @@ if overlap_all_three > 0:
     print(f"\nOutliers identified by all three methods:")
     consensus_outliers = kmeans_outliers & hierarchical_outliers & dbscan_outliers
     comparison_df = pd.DataFrame({
-        "kmeans_score": anomaly_df["Anomaly_score"],
+        "kmeans_score": anomaly_df["anomaly_score"],
         "hier_score": pd.Series(hierarchical_anomaly_score),
         "dbscan_score": pd.Series(dbscan_anomaly_score),
         "stroke": anomaly_df["stroke"]})
@@ -226,6 +229,63 @@ plt.xlabel("PCA Component 1")
 plt.ylabel("PCA Component 2")
 plt.title("K-Means Clustering (PCA)")
 plt.show()
+
+# Anomaly score plots for each method
+plt.figure(figsize=(8, 6))
+scatter = plt.scatter(X_pca[:, 0], X_pca[:, 1], c=kmeans_anomaly_score, cmap="YlOrRd", s=18, alpha=0.7)
+plt.colorbar(scatter, label="K-means anomaly score f(x)")
+plt.title("K-means: PCA data points colored by f(x)")
+plt.xlabel("PCA Component 1")
+plt.ylabel("PCA Component 2")
+plt.show()
+
+plt.figure(figsize=(8, 4))
+plt.hist(kmeans_anomaly_score, bins=50, edgecolor="black", alpha=0.75)
+plt.axvline(threshold, color="red", linestyle="--", label=f"99th percentile = {threshold:.3f}")
+plt.title("K-means anomaly score distribution")
+plt.xlabel("f(x)")
+plt.ylabel("Frequency")
+plt.legend()
+plt.show()
+
+plt.figure(figsize=(8, 6))
+scatter = plt.scatter(X_pca[:, 0], X_pca[:, 1], c=hierarchical_anomaly_score, cmap="YlGnBu", s=18, alpha=0.7)
+plt.colorbar(scatter, label="Hierarchical anomaly score f(x)")
+plt.title("Hierarchical: PCA data points colored by f(x)")
+plt.xlabel("PCA Component 1")
+plt.ylabel("PCA Component 2")
+plt.show()
+
+plt.figure(figsize=(8, 4))
+plt.hist(hierarchical_anomaly_score, bins=50, edgecolor="black", alpha=0.75)
+plt.axvline(hier_threshold, color="red", linestyle="--", label=f"99th percentile = {hier_threshold:.3f}")
+plt.title("Hierarchical anomaly score distribution")
+plt.xlabel("f(x)")
+plt.ylabel("Frequency")
+plt.legend()
+plt.show()
+
+finite_dbscan_scores = dbscan_anomaly_score[np.isfinite(dbscan_anomaly_score)]
+plot_dbscan_scores = dbscan_anomaly_score.copy()
+if finite_dbscan_scores.size > 0:
+    max_finite = np.max(finite_dbscan_scores)
+    plot_dbscan_scores[np.isinf(plot_dbscan_scores)] = max_finite * 1.05
+
+plt.figure(figsize=(8, 6))
+scatter = plt.scatter(X_pca[:, 0], X_pca[:, 1], c=plot_dbscan_scores, cmap="plasma", s=18, alpha=0.7)
+plt.colorbar(scatter, label="DBSCAN anomaly score f(x)")
+plt.title("DBSCAN: PCA data points colored by f(x)")
+plt.xlabel("PCA Component 1")
+plt.ylabel("PCA Component 2")
+plt.show()
+
+if finite_dbscan_scores.size > 0:
+    plt.figure(figsize=(8, 4))
+    plt.hist(finite_dbscan_scores, bins=50, edgecolor="black", alpha=0.75)
+    plt.title("DBSCAN anomaly score distribution (finite scores)")
+    plt.xlabel("f(x)")
+    plt.ylabel("Frequency")
+    plt.show()
 
 # Inspection
 
