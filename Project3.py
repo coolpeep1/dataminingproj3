@@ -69,7 +69,7 @@ threshold = np.quantile(kmeans_anomaly_score, 0.99)
 anomaly_df["is_outlier"] = anomaly_df["anomaly_score"] >= threshold
 
 print("\nK-means anomaly score summary:")
-print(anomaly_df["Anom"].describe())
+print(anomaly_df["anomaly_score"].describe())
 print(f"K-means outlier threshold (99th percentile): {threshold:.4f}")
 print("Number of flagged outliers:", anomaly_df["is_outlier"].sum())
 print(f"\nTop {top_n} K-means outliers:")
